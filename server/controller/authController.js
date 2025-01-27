@@ -8,63 +8,80 @@ const saltRounds = parseInt(process.env.SALT);
 
 const authController = {
   login: async (req, res) => {
-    // res.send("login");
+    try {
+      const { email, password } = req.body;
 
-    const { email, password } = req.body;
+      // Validate input
+      if (!email || !password) {
+        return res.status(400).send({ msg: "Email and password are required" });
+      }
 
-    const user = await User.findOne({ email: email });
+      // Find user in the database
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(404).send({ msg: "User not found" });
+      }
 
-    console.log(user);
-    let hashedPassword = user.password;
-    const isPasswordCorrect = await bcrypt.compare(password, hashedPassword);
-    console.log(isPasswordCorrect);
+      // Check if the password is correct
+      const isPasswordCorrect = await bcrypt.compare(password, user.password);
+      if (!isPasswordCorrect) {
+        return res.status(401).send({ msg: "Invalid password" });
+      }
 
-    if (isPasswordCorrect) {
-      createJWT(email, role);
+      // Generate JWT and set cookies
+      const role = user.role || "user"; // Default role
+      const jwtToken = createJWT(email, role);
+
       res.cookie("jwt", jwtToken, {
         httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24 * 5,
-        secure: process.env.NODE_ENV === "production",
+        maxAge: 1000 * 60 * 60 * 24 * 5, // 5 days
+        secure: process.env.NODE_ENV === "production", // Secure only in production
       });
+
       createCookie(res, jwtToken);
 
-      res.status(202).send({ msg: "User found", user: user });
-    } else {
-      res.status(404).send({ msg: "User not found" });
+      res.status(200).send({ msg: "Login successful", user });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ msg: "Internal server error" });
     }
-    // res.send(user);
   },
-  register: (req, res) => {
-    // res.send("register");
-    const { email, password, repeatPassword } = req.body;
 
-    let role = "user";
+  register: async (req, res) => {
+    try {
+      const { email, password, repeatPassword } = req.body;
 
-    if (password == repeatPassword) {
-      bcrypt.hash(password, saltRounds, function (err, hash) {
-        if (err) console.log(err, "Error");
+      // Validate input
+      if (!email || !password || !repeatPassword) {
+        return res.status(400).send({ msg: "All fields are required" });
+      }
+      if (password !== repeatPassword) {
+        return res.status(400).send({ msg: "Passwords do not match" });
+      }
 
-        const user = new User({
-          email: email,
-          password: hash,
-          role: role,
-        });
-        console.log(user);
-        user.save();
-        createCookie(res, jwtToken);
+      // Hash password
+      const hash = await bcrypt.hash(password, saltRounds);
 
-        const jwtToken = createJWT(email, role);
-        res.cookie("jwt", jwtToken, {
-          httpOnly: true,
-          maxAge: 1000 * 60 * 60 * 24 * 5,
-          secure: process.env.NODE_ENV === "production",
-        });
-        // console.log(jwtToken, "JWT_Token");
+      // Create user
+      const role = "user";
+      const user = new User({ email, password: hash, role });
 
-        res.status(201).send({ msg: "User created", user: user });
+      await user.save();
+
+      // Generate JWT and set cookies
+      const jwtToken = createJWT(email, role);
+      res.cookie("jwt", jwtToken, {
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 * 5, // 5 days
+        secure: process.env.NODE_ENV === "production",
       });
-    } else {
-      res.status(500).send({ msg: "Passwords do not match" });
+
+      createCookie(res, jwtToken);
+
+      res.status(201).send({ msg: "User created successfully", user });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ msg: "Internal server error" });
     }
   },
 };
