@@ -1,13 +1,36 @@
 import React, { useState } from "react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import axios from "axios";
 
 const Register = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
+
+  const { msg, setMsg } = useState("");
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    console.log("Hello there!");
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/auth/register`,
+        { email, password, repeatPassword },
+        {
+          withCredentials: true,
+          timeout: 5000,
+        }
+      );
+
+      console.log(response.data, "RESPONSE DATA");
+      setMsg(response.data.msg);
+    } catch (error) {
+      console.error("Register failed", error.response?.data || error.message);
+      setMsg(error.response?.data?.msg || "Register failed");
+    }
   }
 
   return (
@@ -27,6 +50,7 @@ const Register = () => {
               type="email"
               placeholder="Email"
               required
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full pl-10 pr-4 py-3 rounded-lg bg-zinc-700 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             />
           </div>
@@ -40,6 +64,7 @@ const Register = () => {
               type={showPassword ? "text" : "password"}
               placeholder="Password"
               required
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full pl-10 pr-12 py-3 rounded-lg bg-zinc-700 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             />
             <button
@@ -60,6 +85,7 @@ const Register = () => {
               type={showConfirmPassword ? "text" : "password"}
               placeholder="Confirm Password"
               required
+              onChange={(e) => setRepeatPassword(e.target.value)}
               className="w-full pl-10 pr-12 py-3 rounded-lg bg-zinc-700 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             />
             <button
@@ -78,6 +104,13 @@ const Register = () => {
             Register
           </button>
         </form>
+        {msg ? (
+          <div>
+            <p>{msg}</p>
+          </div>
+        ) : (
+          <div></div>
+        )}
       </div>
     </div>
   );

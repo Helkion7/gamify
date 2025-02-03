@@ -45,7 +45,7 @@ const authController = {
 
       // Generate token and set cookie
       const role = user.role || "user";
-      const jwtToken = createJWT(email, role);
+      const jwtToken = await createJWT(email, role);
       createCookie(res, jwtToken);
 
       // Remove password from response
@@ -69,14 +69,13 @@ const authController = {
     try {
       const { email, password, repeatPassword } = req.body;
 
-      // Input validation
+      console.log("REGISTER", req.body);
       if (!email || !password || !repeatPassword) {
         return res.status(400).json({
           msg: "All fields are required",
         });
       }
 
-      // Email format validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         return res.status(400).json({
@@ -84,7 +83,6 @@ const authController = {
         });
       }
 
-      // Password validation
       if (password.length < 8) {
         return res.status(400).json({
           msg: "Password must be at least 8 characters long",
@@ -120,7 +118,7 @@ const authController = {
       await user.save();
 
       // Generate token and set cookie
-      const jwtToken = createJWT(email, "user");
+      const jwtToken = await createJWT(email, "user");
       await createCookie(res, jwtToken);
 
       // Remove password from response
