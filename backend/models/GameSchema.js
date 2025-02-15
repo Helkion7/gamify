@@ -2,16 +2,48 @@ const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 
 const gameSchema = new Schema({
-  title: { type: String },
-  price: { type: Number },
-  discount: { type: Number },
-  publisher: { type: String },
-  developer: { type: String },
-  releaseDate: { type: String },
-  status: { type: String },
-  description: { type: String },
-  shortDescription: { type: String },
-  img: { type: String },
+  title: {
+    type: String,
+    required: true,
+  },
+  price: {
+    type: Number,
+    required: true,
+  },
+  discount: {
+    type: Number,
+    required: false,
+  },
+  publisher: {
+    type: String,
+    required: true,
+  },
+  developer: {
+    type: String,
+    required: true,
+  },
+  releaseDate: {
+    type: Date,
+    required: true,
+  },
+  status: {
+    type: Number,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  shortDescription: {
+    type: String,
+    required: true,
+  },
+  image: [
+    {
+      type: String,
+      required: false,
+    },
+  ],
   tags: [
     {
       type: mongoose.Schema.Types.ObjectId,

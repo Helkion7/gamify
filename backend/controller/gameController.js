@@ -21,6 +21,7 @@ const gameController = {
       const {
         title,
         price,
+        discount, // Added from friend's version
         publisher,
         developer,
         releaseDate,
@@ -39,6 +40,7 @@ const gameController = {
       const game = new Game({
         title,
         price,
+        discount, // Added from friend's version
         publisher,
         developer,
         releaseDate,

@@ -1,36 +1,38 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/UserSchema.js");
 require("dotenv").config();
+const User = require("../models/UserSchema");
 
 async function verifyJwt(req, res, next) {
   const jsonwebtoken = req.cookies.jwt;
 
-  await jwt.verify(
-    jsonwebtoken,
-    process.env.SECRET_KEY,
-    async (err, decoded) => {
-      if (err) {
-        console.log(err);
-        return res.status(401).send({ msg: "user not authenticated" });
-      }
-
-      console.log(decoded);
-      let email = decoded.email;
-      req.user = decoded;
-
-      try {
-        const user = await User.findOne({ email });
-        if (!user) {
-          return res.status(404).send({ msg: "User not found" });
+  if (jsonwebtoken) {
+    await jwt
+      .verify(jsonwebtoken, process.env.SECRET_KEY, async (err, decoded) => {
+        if (err) {
+          console.log(err);
+          res.status(401).send({ msg: "Invalid token" });
+          return;
         }
-        req.user.id = user._id;
-        next(); // Ensure next() is called after everything is done
-      } catch (error) {
-        console.log(error);
-        res.status(500).send({ msg: "Server error" });
-      }
-    }
-  );
+        console.log(decoded);
+        let email = decoded.email;
+        req.user = decoded;
+
+        try {
+          const user = await User.findOne({ email });
+          console.log(user, "USER");
+          req.user.id = user._id;
+        } catch (error) {
+          console.log(error);
+          res.status(500).send({ msg: "Error getting user" });
+          return;
+        }
+        console.log(req.user);
+      })
+      .then(() => {
+        console.log(req.user);
+        next();
+      });
+  }
 }
 
 module.exports = verifyJwt;

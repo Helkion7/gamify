@@ -3,6 +3,9 @@ import { Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import CreateGame from "./pages/CreateGame.jsx";
+import GamePage from "./pages/GamePage.jsx";
+import GameBox from "./pages/GameBox.jsx";
 import NotFound from "./pages/NotFound";
 
 function App() {
@@ -12,6 +15,9 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/create-game" element={<CreateGame />} />
+        <Route path="/games" element={<GamePage />} />
+        <Route path="/game/:id" element={<GameBox />} />
         <Route path="/*" element={<NotFound />} />
       </Routes>
     </div>
