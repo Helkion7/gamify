@@ -5,7 +5,7 @@ const createJWT = require("../utils/createJWT");
 const createCookie = require("../utils/createCookie.js");
 
 // Move environment variables to top for better visibility
-const saltRounds = parseInt(process.env.SALT) || 10; // Added fallback
+const saltRounds = parseInt(process.env.SALT); // Added fallback
 
 const authController = {
   login: async (req, res) => {

@@ -7,7 +7,7 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
 
-  const { msg, setMsg } = useState("");
+  const [msg, setMsg] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
